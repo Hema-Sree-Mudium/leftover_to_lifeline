@@ -1,11 +1,11 @@
-# Python / Backend
+# Backend
 backend/venv/
 backend/__pycache__/
 *.pyc
 *.sqlite3
 backend/.env
 
-# Node / Frontend
+# Frontend
 frontend/node_modules/
 frontend/dist/
 frontend/.env
