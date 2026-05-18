@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from donations.models import Donation
 from .serializers import DonationSerializer, UserSerializer
+from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 
@@ -78,3 +79,23 @@ class AdminStatsView(APIView):
             'delivered_donations': delivered_donations,
             'in_transit': in_transit
         })
+    
+class RegisterUserView(APIView):
+    permission_classes = [AllowAny] # Crucial: Allows unauthenticated users to sign up
+
+    def post(self, request):
+        data = request.data
+        try:
+            # Check if username already exists
+            if User.objects.filter(username=data['username']).exists():
+                return Response({'error': 'Username already taken'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create the user securely
+            user = User.objects.create_user(
+                username=data['username'],
+                password=data['password'],
+                role=data['role'] # DONOR, NGO, or VOLUNTEER
+            )
+            return Response({'message': 'Account created successfully!'}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
