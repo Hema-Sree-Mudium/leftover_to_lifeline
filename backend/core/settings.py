@@ -34,8 +34,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary_storage', # Must be before staticfiles
     'django.contrib.staticfiles',
+    'cloudinary_storage',
     'cloudinary',
     # Third-party apps
     'rest_framework',
@@ -116,7 +116,9 @@ CLOUDINARY_STORAGE = {
 }
 
 # --- MODERN DJANGO STORAGE ENGINE ---
-# This explicitly replaces the deprecated DEFAULT_FILE_STORAGE and STATICFILES_STORAGE
+# Dummy fallback to prevent dj3-cloudinary-storage crash
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
