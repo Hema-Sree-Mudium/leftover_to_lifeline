@@ -23,7 +23,7 @@ DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = ['*']
 
-# For Render Deployment
+# For Render Deployment Security
 CSRF_TRUSTED_ORIGINS = ['https://leftover-to-lifeline.onrender.com']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary_storage',
+    'cloudinary_storage', # Must be before staticfiles
     'django.contrib.staticfiles',
     'cloudinary',
     # Third-party apps
@@ -101,13 +101,30 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static files and Media Variables
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Use WhiteNoise to compress and serve static files in production
-if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Cloudinary Credentials
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'your_local_cloud_name'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', 'your_local_api_key'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'your_local_api_secret'),
+}
+
+# --- MODERN DJANGO STORAGE ENGINE ---
+# This explicitly replaces the deprecated DEFAULT_FILE_STORAGE and STATICFILES_STORAGE
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -128,19 +145,6 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
-
-# Media (User Uploads) - Routed to Cloudinary CDN in Production
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'your_local_cloud_name'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', 'your_local_api_key'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'your_local_api_secret'),
-}
-
-# Tell Django to use Cloudinary for all ImageFields
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # --- CORS SECURITY SETTINGS ---
 # Allows your Vercel frontend to communicate with the Render backend
