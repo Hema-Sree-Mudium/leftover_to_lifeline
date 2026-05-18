@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React, { useState, useContext } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -46,6 +47,9 @@ const Login = () => {
                         <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
                     <button type="submit" className="btn btn-primary w-100">Login</button>
+                    <div className="text-center mt-3">
+                        <Link to="/signup">Don't have an account? Sign up here.</Link>
+                    </div>
                 </form>
             </div>
         </div>
