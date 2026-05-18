@@ -34,7 +34,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
     # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
@@ -127,9 +129,18 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# Media (User Uploads)
+# Media (User Uploads) - Routed to Cloudinary CDN in Production
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'your_local_cloud_name'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', 'your_local_api_key'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'your_local_api_secret'),
+}
+
+# Tell Django to use Cloudinary for all ImageFields
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # --- CORS SECURITY SETTINGS ---
 # Allows your Vercel frontend to communicate with the Render backend
