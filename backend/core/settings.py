@@ -107,7 +107,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Use WhiteNoise to compress and serve static files in production
 if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
