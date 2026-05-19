@@ -47,7 +47,12 @@ const Login = () => {
             else navigate('/admin');
 
         } catch (err) {
-            setError('Invalid credentials. Please try again.');
+            // This forces the console to print the exact error Render sent back
+            console.error("ACTUAL BACKEND ERROR:", err.response);
+            
+            // This attempts to show Django's real error message on the screen instead of a generic one
+            const realError = err.response?.data?.detail || "Server connection failed. Check console.";
+            setError(realError);
         }
     };
 
