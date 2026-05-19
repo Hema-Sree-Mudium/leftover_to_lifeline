@@ -20,13 +20,21 @@ const NGODashboard = () => {
         fetchDonations();
     };
 
+    const handleNuclearLogout = () => {
+        // 1. Destroy all tokens and roles in the browser memory
+        localStorage.clear();
+    
+        // 2. Force the browser to redirect and dump React's internal memory state
+        window.location.href = '/login'; 
+    };
+
     return (
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                 <h2>NGO Dashboard</h2>
                 <div>
                     <span className="me-3 fw-bold">Logged in as: {user.username}</span>
-                    <button onClick={logout} className="btn btn-sm btn-danger">Logout</button>
+                    <button onClick={handleNuclearLogout} className="btn btn-danger">Log Out</button>
                 </div>
             </div>
 
