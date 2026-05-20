@@ -47,12 +47,15 @@ const Login = () => {
             else navigate('/admin');
 
         } catch (err) {
-            // This forces the console to print the exact error Render sent back
-            console.error("ACTUAL BACKEND ERROR:", err.response);
-            
-            // This attempts to show Django's real error message on the screen instead of a generic one
-            const realError = err.response?.data?.detail || "Server connection failed. Check console.";
-            setError(realError);
+            // Check if e.response exists before logging or accessing data
+            if (e.response) {
+                console.error(`ACTUAL BACKEND ERROR:`, e.response);
+                a(e.response.data?.detail || `Server error: ${e.response.status}`);
+            } else {
+                // Handle cases like network timeouts or CORS errors where no response is returned
+                console.error(`NETWORK OR CLIENT ERROR:`, e.message || e);
+                a(`Server connection failed. Please check your internet or CORS settings.`);
+            }
         }
     };
 
