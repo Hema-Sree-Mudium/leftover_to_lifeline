@@ -1,23 +1,16 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    // Keep using the environment variable for deployment flexibility
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://leftover-to-lifeline.onrender.com/api',
+    
+    // CRITICAL: Tells Axios to send cross-origin cookies/tokens if needed
+    withCredentials: true, 
+    
     headers: {
         'Content-Type': 'application/json',
-    },
-});
-
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+        'Accept': 'application/json',
     }
-);
+});
 
 export default api;

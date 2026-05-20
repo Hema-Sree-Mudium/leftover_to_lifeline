@@ -148,6 +148,26 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# --- CORS SECURITY SETTINGS ---
-# Allows your Vercel frontend to communicate with the Render backend
-CORS_ALLOW_ALL_ORIGINS = True
+# SECURITY WARNING: Keep the secret key used in production secret!
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-...')
+
+DEBUG = 'RENDER' not in os.environ
+
+# 1. ALLOWED HOSTS (Must include Render)
+ALLOWED_HOSTS = ['leftover-to-lifeline.onrender.com', 'localhost', '127.0.0.1']
+
+# 2. CORS CONFIGURATION (Strictly Whitelisting Vercel)
+# Do NOT use CORS_ALLOW_ALL_ORIGINS = True in production.
+CORS_ALLOWED_ORIGINS = [
+    "https://leftover-to-lifeline.vercel.app", # Replace with your exact Vercel URL
+    "http://localhost:5173", # For local React testing
+]
+CORS_ALLOW_CREDENTIALS = True # Critical for passing JWT tokens/sessions
+
+# 3. CSRF & SECURE PROXY CONFIGURATION (The Render Fix)
+# This forces Django to trust the Render HTTPS proxy, preventing the crashes
+CSRF_TRUSTED_ORIGINS = [
+    'https://leftover-to-lifeline.onrender.com',
+    'https://leftover-to-lifeline.vercel.app',
+]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
