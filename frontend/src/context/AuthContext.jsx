@@ -25,29 +25,40 @@ export const AuthProvider = ({ children }) => {
     const fetchUserProfile = async () => {
         try {
             const token = localStorage.getItem('access_token');
-            
-            // 1. Decode the token to find out exactly WHO is holding it
             const decoded = jwtDecode(token);
-            
-            // Django SimpleJWT stores the user's database ID in 'user_id'
             const myUserId = decoded.user_id; 
+            
+            // Grab the role we saved to the hard drive during login
+            const savedRole = localStorage.getItem('role'); 
 
             const response = await api.get('/users/');
             
-            // --- THE FIX: IDENTITY VERIFICATION ---
             if (Array.isArray(response.data)) {
-                // If Django returns a giant list of users (because we are an Admin),
-                // search the list to find the EXACT profile matching our token's ID.
-                const myProfile = response.data.find(u => u.id === myUserId);
+                // Notice the '==' instead of '==='. 
+                // This prevents bugs if Django sends the ID as a string "1" but the token has integer 1.
+                const myProfile = response.data.find(u => u.id == myUserId);
                 
                 if (myProfile) {
                     setUser(myProfile);
                 } else {
-                    // Fallback just in case the ID formatting is strange
-                    setUser(response.data[0]); 
+                    // --- THE INVISIBLE ADMIN FIX ---
+                    // If Django hid the user from the list, check if they are an ADMIN.
+                    if (savedRole === 'ADMIN' || savedRole === 'Admin') {
+                        // Construct a local Admin profile so the router lets them in
+                        setUser({ 
+                            id: myUserId, 
+                            username: 'Administrator', 
+                            role: 'ADMIN' 
+                        });
+                    } else {
+                        // If they aren't an admin and still aren't found, 
+                        // NEVER steal an identity. Force a logout.
+                        console.error("User ID not found in database list. Aborting.");
+                        logout(); 
+                    }
                 }
             } else {
-                // If Django correctly returns a single object
+                // If Django correctly returns a single object instead of a list
                 setUser(response.data);
             }
         } catch (error) {
