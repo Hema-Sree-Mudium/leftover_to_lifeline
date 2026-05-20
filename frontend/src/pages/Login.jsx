@@ -47,15 +47,14 @@ const Login = () => {
             else navigate('/admin');
 
         } catch (err) {
-            // Check if e.response exists before logging or accessing data
-            if (e.response) {
-                console.error(`ACTUAL BACKEND ERROR:`, e.response);
-                a(e.response.data?.detail || `Server error: ${e.response.status}`);
-            } else {
-                // Handle cases like network timeouts or CORS errors where no response is returned
-                console.error(`NETWORK OR CLIENT ERROR:`, e.message || e);
-                a(`Server connection failed. Please check your internet or CORS settings.`);
-            }
+            // 1. Log the full error to the console safely
+            console.error("ACTUAL BACKEND ERROR:", err.response || err.message || err);
+    
+            // 2. Extract the message safely
+            const errorMessage = err.response?.data?.detail || err.message || "Server connection failed. Check your internet or server status.";
+    
+            // 3. Update the UI using your ACTUAL state function
+            setError(errorMessage);
         }
     };
 
