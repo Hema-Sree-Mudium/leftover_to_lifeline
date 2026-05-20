@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import React, { useState, useContext } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -8,18 +7,24 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { login, user } = useContext(AuthContext);
-    const navigate = useNavigate();
+    
+    // We only need 'user' here to check if they are already logged in.
+    const { user } = useContext(AuthContext); 
 
-    // If already logged in, do not show login page
-    if (user) {
+    // --- FIX 1: STANDARDIZED ROUTES ---
+    // These must exactly match the URLs defined in your App.jsx Router
+    if (user && user.role) {
         const roleRoutes = {
             'ADMIN': '/admin',
             'DONOR': '/donor',
             'NGO': '/ngo',
             'VOLUNTEER': '/volunteer'
         };
-        return <Navigate to={roleRoutes[user.role]} replace />;
+        const targetRoute = roleRoutes[user.role] || '/login';
+        
+        if (targetRoute !== '/login') {
+            return <Navigate to={targetRoute} replace />;
+        }
     }
 
     const handleSubmit = async (e) => {
@@ -32,36 +37,37 @@ const Login = () => {
         };
 
         try {
-            // 1. THE PURGE: Destroy any lingering session data before doing anything
+            // 1. Destroy lingering sessions
             localStorage.clear(); 
         
-            // 2. The standard login request
+            // 2. Request new tokens
             const response = await api.post('/auth/login/', formData);
         
-            // 3. Save the brand new credentials
+            // 3. Save new credentials to the browser's hard drive
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
         
-            // NOTE: Make sure your backend actually returns the user's role here!
-            // If it doesn't, you need to fetch the user profile, or decode the JWT.
-            localStorage.setItem('role', response.data.role); 
+            const userRole = response.data.role || 'UNKNOWN';
+            localStorage.setItem('role', userRole); 
         
             alert("Login successful!");
         
-            // Route based on the NEW role
-            if (response.data.role === 'DONOR') navigate('/donor-dashboard');
-            else if (response.data.role === 'NGO') navigate('/ngo-dashboard');
-            else if (response.data.role === 'VOLUNTEER') navigate('/volunteer-dashboard');
-            else navigate('/admin');
+            // --- FIX 2: THE HARD REDIRECT ---
+            // This forces the browser to refresh, wiping the outdated AuthContext
+            // and forcing it to read the new localStorage data on boot.
+            if (userRole === 'DONOR') {
+                window.location.href = '/donor';
+            } else if (userRole === 'NGO') {
+                window.location.href = '/ngo';
+            } else if (userRole === 'VOLUNTEER') {
+                window.location.href = '/volunteer';
+            } else {
+                window.location.href = '/admin';
+            }
 
         } catch (err) {
-            // 1. Log the full error to the console safely
             console.error("ACTUAL BACKEND ERROR:", err.response || err.message || err);
-    
-            // 2. Extract the message safely
             const errorMessage = err.response?.data?.detail || err.message || "Server connection failed. Check your internet or server status.";
-    
-            // 3. Update the UI using your ACTUAL state function
             setError(errorMessage);
         }
     };
