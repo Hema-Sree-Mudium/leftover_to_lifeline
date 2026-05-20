@@ -24,6 +24,13 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+
+        const formData = {
+            username: username,
+            password: password
+        };
+
         try {
             // 1. THE PURGE: Destroy any lingering session data before doing anything
             localStorage.clear(); 
